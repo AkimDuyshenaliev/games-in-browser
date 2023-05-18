@@ -1,29 +1,37 @@
-import { generateArray, checkIfCorrect } from "./utils/control.js";
+import {
+  generateArray,
+  diagonalSudokuFill,
+  checkIfCorrect,
+} from "./utils/num-gen.js";
 
+// generateTable();
+
+sudokuMatrix();
 function sudokuMatrix(dimensions = [9, 9], empty = false) {
   // [9, 9] matrix
+  let baseMatrix;
+
   if (empty == true) {
-    let baseMatrix = Array(dimensions[0])
+    baseMatrix = Array(dimensions[0])
       .fill()
       .map(() => Array(dimensions[1]).fill(0));
+    return baseMatrix;
   }
 
-  let baseMatrix = Array();
-  for (let i = 0; i <= dimensions[0]; i++) {
-    baseMatrix.push(generateArray());
-    /// Check is here! ! ! ! ///
-  }
+  let i = 0;
+  baseMatrix = Array(dimensions[0])
+    .fill()
+    .map(() => Array(dimensions[1]).fill(0));
+  diagonalSudokuFill(baseMatrix);
   console.log(baseMatrix);
-  return baseMatrix;
 }
-sudokuMatrix();
 
 function generateTable() {
   // [[0-0],[0-1],...,[9-8],[9-9]] - row id, cell id
-  var baseMatrix = sudokuMatrix();
+  var baseMatrix = sudokuMatrix([9, 9], true);
   var table = document.createElement("table");
   var tableBody = document.createElement("tbody");
-  var nums = generateArray((arrayEndNum = 9), (random = false));
+  var nums = generateArray(1, 9, false);
 
   var i = 0;
   baseMatrix.forEach(function (rowData) {
@@ -54,8 +62,9 @@ function generateTable() {
   });
 
   table.appendChild(tableBody);
-  tableContainer = document.getElementById("table-container");
-  tableContainer.appendChild(table);
+  let tableContainer = document
+    .getElementById("table-container")
+    .appendChild(table);
 
   return table;
 }
