@@ -1,8 +1,9 @@
 import {
   generateArray,
   diagonalSudokuFill,
+  fillSudokuBoard,
   checkIfCorrect,
-} from "./utils/num-gen.js";
+} from "./utils/board-generation.js";
 
 // generateTable();
 
@@ -22,7 +23,8 @@ function sudokuMatrix(dimensions = [9, 9], empty = false) {
   baseMatrix = Array(dimensions[0])
     .fill()
     .map(() => Array(dimensions[1]).fill(0));
-  diagonalSudokuFill(baseMatrix);
+  diagonalSudokuFill(baseMatrix); // Fill 3 diagonal sudoku 9x9 blocks, left top to right bottom
+  fillSudokuBoard(baseMatrix, 0, 0); // Fill the rest of the blocks recursively, using Backtracking algorithm
   console.log(baseMatrix);
 }
 
