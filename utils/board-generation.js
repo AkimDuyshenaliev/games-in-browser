@@ -27,7 +27,7 @@ export function diagonalSudokuFill(matrix) {
 }
 
 export function fillSudokuBoard(matrix, row, col) {
-  if (col >= matrix.length) {
+  if (col >= matrix[row].length) {
     row++;
     col = 0;
   }
@@ -37,20 +37,28 @@ export function fillSudokuBoard(matrix, row, col) {
   if (matrix[row][col] != 0) {
     return fillSudokuBoard(matrix, row, col + 1);
   }
-  
-  let arr = generateArray(1,9,true);
-  for (let num in arr) {
+
+  let arr = generateArray(1, 9);
+
+  for (let num of arr) { // IMOIRTANT "LET NUM """OF""" ARR" """OF""" ARR
     if (devBoardCheck(matrix, row, col, num)) {
-      matrix[row][col]=num;
+      matrix[row][col] = num;
+
+      if (fillSudokuBoard(matrix, row, col + 1)) {
+        return true;
+      }
+
+      matrix[row][col] = 0;
     }
   }
+  return false; // No valid solution
 }
 
 function devBoardCheck(matrix, row, col, num) {
-  for (let i = 0; i < matrix.length; i++) {
-    if (matrix[i][col] == num) {
+  for (let i = 0; i < matrix[row].length; i++) {
+    if (matrix[row][i] == num) {
       return false;
-    } else if (matrix[row][i] == num) {
+    } else if (matrix[i][col] == num) {
       return false;
     }
   }
