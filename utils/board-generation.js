@@ -1,3 +1,23 @@
+export function sudokuMatrix(dimensions = [9, 9], empty = false) {
+  // [9, 9] matrix
+  let baseMatrix;
+
+  if (empty == true) {
+    baseMatrix = Array(dimensions[0])
+      .fill()
+      .map(() => Array(dimensions[1]).fill(0));
+    return baseMatrix;
+  }
+
+  let i = 0;
+  baseMatrix = Array(dimensions[0])
+    .fill()
+    .map(() => Array(dimensions[1]).fill(0));
+  diagonalSudokuFill(baseMatrix); // Fill 3 diagonal sudoku 9x9 blocks, left top to right bottom
+  fillSudokuBoard(baseMatrix, 0, 0); // Fill the rest of the blocks recursively, using Backtracking algorithm
+  return baseMatrix;
+}
+
 export function generateArray(startNum, arrayEndNum, random = true) {
   let nums = new Set([]);
   while (nums.size != arrayEndNum) {
