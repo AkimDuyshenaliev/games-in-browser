@@ -1,3 +1,19 @@
+export function generateArray(startNum, arrayEndNum, random = true) {
+  let nums = new Set([]);
+  while (nums.size != arrayEndNum) {
+    if (random == true) {
+      nums.add(
+        Math.floor(Math.random() * (arrayEndNum - startNum + 1) + startNum)
+      );
+    } else {
+    }
+    nums.add(startNum);
+    startNum++;
+  }
+  let arrNums = Array.from(nums);
+  return arrNums;
+}
+
 export function sudokuMatrix(dimensions = [9, 9], empty = false) {
   // [9, 9] matrix
   let baseMatrix;
@@ -16,22 +32,6 @@ export function sudokuMatrix(dimensions = [9, 9], empty = false) {
   diagonalSudokuFill(baseMatrix); // Fill 3 diagonal sudoku 9x9 blocks, left top to right bottom
   fillSudokuBoard(baseMatrix, 0, 0); // Fill the rest of the blocks recursively, using Backtracking algorithm
   return baseMatrix;
-}
-
-export function generateArray(startNum, arrayEndNum, random = true) {
-  let nums = new Set([]);
-  while (nums.size != arrayEndNum) {
-    if (random == true) {
-      nums.add(
-        Math.floor(Math.random() * (arrayEndNum - startNum + 1) + startNum)
-      );
-    } else {
-      nums.add(startNum);
-      startNum++;
-    }
-  }
-  let arrNums = Array.from(nums);
-  return arrNums;
 }
 
 export function diagonalSudokuFill(matrix) {
@@ -60,7 +60,8 @@ export function fillSudokuBoard(matrix, row, col) {
 
   let arr = generateArray(1, 9);
 
-  for (let num of arr) { // IMOIRTANT "LET NUM """OF""" ARR" """OF""" ARR
+  for (let num of arr) {
+    // IMOIRTANT "LET NUM """OF""" ARR" """OF""" ARR
     if (devBoardCheck(matrix, row, col, num)) {
       matrix[row][col] = num;
 
@@ -95,8 +96,4 @@ function devBoardCheck(matrix, row, col, num) {
   }
 
   return true;
-}
-
-export function checkIfCorrect(e) {
-  console.log("Cell " + e.target.id + ", value " + e.target.value);
 }
