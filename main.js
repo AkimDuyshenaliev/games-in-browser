@@ -7,7 +7,7 @@ import { MainMenu } from "./classes/class-main-menu.js";
 
 // Sudoku board from classes
 // const board = new SudokuBoard(document);
-// board.buildBoard("main");
+// board.buildBoard("main", 17);
 
 // Main menu before the game
 const menu = new MainMenu(document);
