@@ -1,7 +1,7 @@
-export function createChoices(event, choices, cell) {
+export function createChoices(event, choices, cell, matrix) {
   let select = document.getElementById("choice-menu");
-  if (select != null) {
-    removeChoices();
+  if (select != null) { // Check if select box exists
+    removeChoices(cell);
   } else {
     select = document.createElement("div");
     select.id = "choice-menu";
@@ -13,7 +13,11 @@ export function createChoices(event, choices, cell) {
     choice.id = "choice";
     choice.innerHTML = choices[i];
     choice.addEventListener("click", (event) => {
-      cell.style.setProperty("background-color", "lightblue", "");
+      if (checkIfCorrect(event, cell, matrix) == true) {
+        cell.style.setProperty("background-color", "lightblue", "");
+      } else {
+        cell.style.setProperty("background-color", "red", "");
+      }
       cell.innerHTML = event.target.innerHTML;
     });
 
@@ -22,23 +26,33 @@ export function createChoices(event, choices, cell) {
   cell.appendChild(select);
 }
 
-export function removeChoices() {
-  let select = document.getElementById("choice-menu");
-  while (select.firstChild) {
-    select.removeChild(select.firstChild);
+export function removeChoices(cell) {
+  while (cell.lastChild.id == "choice-menu") {
+    cell.removeChild(cell.lastChild);
   }
 }
 
-export function cellObserver(cell) {
+export function cellObserver(choices, cell) {
+  //Observe changes in innerHTML and remove choices when number selected
+  let simpleCounter = 0;
   const observerConfig = { characterData: true, childList: true };
   const callback = (mutationList, observer) => {
     for (const mutation of mutationList) {
       if (
         mutation.type === "childList" &&
         mutation.previousSibling != null &&
-        mutation.removedNodes.length == 0
+        cell.lastChild.length != 1 &&
+        simpleCounter % 2 != 0
       ) {
-        removeChoices();
+        simpleCounter == 1 ? (simpleCounter = 0) : simpleCounter++;
+      } else if (
+        mutation.type === "childList" &&
+        mutation.previousSibling != null &&
+        cell.lastChild.length != 1 &&
+        simpleCounter % 2 == 0
+      ) {
+        removeChoices(cell);
+        simpleCounter == 1 ? (simpleCounter = 0) : simpleCounter++;
       }
     }
   };
@@ -61,16 +75,13 @@ export function unsolveTheBoard(matrix, numOfClues) {
   }
 }
 
-export function checkIfCorrect(e, matrix) {
-  console.log("Cell " + e.target.id + ", value " + e.target.value);
-  let row = Number(e.target.id.slice(0, 1));
-  let col = Number(e.target.id.slice(2, 3));
-  let choice = Number(e.target.value);
-  if (choice == 0) {
+export function checkIfCorrect(e, cell, matrix) {
+  let row = Number(cell.id.slice(0, 1));
+  let col = Number(cell.id.slice(2, 3));
+  let choice = Number(e.target.innerHTML);
+  if (matrix[row][col] == choice) {
     return true;
-  }
-  if (matrix[row][col] != choice) {
+  } else {
     return false;
   }
-  return true;
 }
