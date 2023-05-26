@@ -1,14 +1,14 @@
 import { SudokuMatrixGenerator } from "./class-board-generator.js";
 
 export class SudokuBoard extends SudokuMatrixGenerator {
-  constructor(document, titleText) {
+  constructor(document) {
     super();
 
     this.document = document;
     this.baseElement = this.defineBase("div", "custom-select", [
       "flex-container",
     ]);
-    this.title = this.defineTitle("h2", titleText);
+    this.title = this.defineTitle("h2", "Pure node.js Sudoku");
     this.choices = super.generateUniqueArray(0, 10);
     this.matrix = super.sudokuMatrix();
     this.solution = JSON.parse(JSON.stringify(this.matrix));
