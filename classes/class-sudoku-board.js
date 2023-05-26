@@ -15,6 +15,13 @@ export class SudokuBoard extends SudokuMatrixGenerator {
     this.unsolveTheBoard(17);
   }
 
+  /**
+   * The very base of the sudoku board, this element will contain the board
+   * @param { String } element type of DOM element to use (preferable to use DIV)
+   * @param { String } id id of the base element
+   * @param { Array } cssClasses a list of String elements with css class names for base element
+   * @return { node } complete base element
+   */
   defineBase(element, id, cssClasses) {
     let baseElement = this.document.createElement(element);
     baseElement.id = id;
@@ -24,12 +31,22 @@ export class SudokuBoard extends SudokuMatrixGenerator {
     return baseElement;
   }
 
+  /**
+   * Create a title element for the sudoku board
+   * @param { String } element type of DOM element to use to create title
+   * @param { String } text text of the title
+   * @return { node } node title element with selected text
+   */
   defineTitle(element, text) {
     let title = this.document.createElement(element);
     title.innerHTML = text;
     return title;
   }
 
+  /**
+   * Main method that assembles the board, it starts and ends here
+   * @param { String } mainElement the ID of the element in which to place the sudoku board
+   */
   buildBoard(mainElement) {
     for (let row = 0; row < this.matrix.length; row++) {
       let rowBox = this.document.createElement("div");
@@ -41,7 +58,7 @@ export class SudokuBoard extends SudokuMatrixGenerator {
 
         this.cellLogic(row, col, cell, rowBox);
 
-        this.cellStyles(cell, row, col, ["top-border"], ["left-border"]);
+        this.borderStyles(cell, row, col, ["top-border"], ["left-border"]);
       }
       this.baseElement.appendChild(rowBox);
     }
@@ -50,6 +67,14 @@ export class SudokuBoard extends SudokuMatrixGenerator {
     this.document.getElementById(mainElement).appendChild(this.baseElement);
   }
 
+  /**
+   * Method for creating a standard cell before any changes are done, preselected values
+   * also are assigned here
+   * @param { Number } row row in which this cell is places
+   * @param { Number } col column in which this cell is places
+   * @param { node } cell a div element to be configured
+   * @param { node } rowBox a div element in which cells for the current row are being kept
+   */
   cellLogic(row, col, cell, rowBox) {
     if (this.matrix[row][col] == 0) {
       cell.style.setProperty("background-color", "white", "");
@@ -68,7 +93,16 @@ export class SudokuBoard extends SudokuMatrixGenerator {
     rowBox.appendChild(cell);
   }
 
-  cellStyles(cell, row, col, topBorder, leftBorder) {
+  /**
+   * Find specific rows and cols in the board and set appropriate css classes to create
+   * a proper sudoku grid
+   * @param { node } cell current cell that is being evaluated
+   * @param { Number } row row that is being evaluated
+   * @param { Number } col column that is being evaluated
+   * @param { Array } topBorder a list of String values with css class names for top border
+   * @param { Array } leftBorder a list of String values with css class names for left border
+   */
+  borderStyles(cell, row, col, topBorder, leftBorder) {
     let borderRow = row % 3 == false && row != 0 && row != 8;
     let borderCol = col % 3 == false && col != 0 && col != 8;
     if (borderRow) {
@@ -79,6 +113,11 @@ export class SudokuBoard extends SudokuMatrixGenerator {
     }
   }
 
+  /**
+   * Create choices inside a cell and set cell.innerHTML with the chosen number
+   * @param { object } event present but unnecessary in this method
+   * @param { node } cell cell in which to create choices
+   */
   createChoices(event, cell) {
     let lastChoices = this.document.getElementsByClassName(
       "options-flex-container"
@@ -109,6 +148,12 @@ export class SudokuBoard extends SudokuMatrixGenerator {
     cell.appendChild(select);
   }
 
+  /**
+   * Compare selected number with solution matrix and check if choice is correct
+   * @param { object } e event
+   * @param { node } cell cell has id that matches it's position in solution matrix
+   * @return { boolean } returns true for correct choice or false for incorrect
+   */
   checkIfCorrectCell(e, cell) {
     let row = Number(cell.id.slice(0, 1));
     let col = Number(cell.id.slice(2, 3));
@@ -120,8 +165,11 @@ export class SudokuBoard extends SudokuMatrixGenerator {
     }
   }
 
+  /**
+   * Observe changes in innerHTML and remove choices when number selected
+   * @param { node } cell from which to remove choices
+   */
   cellObserver(cell) {
-    //Observe changes in innerHTML and remove choices when number selected
     let simpleCounter = 0;
     const observerConfig = { characterData: true, childList: true };
     const callback = (mutationList, observer) => {
@@ -149,18 +197,31 @@ export class SudokuBoard extends SudokuMatrixGenerator {
     observer.observe(cell, observerConfig);
   }
 
+  /**
+   * Set a list of css class names and set them to the element
+   * @param { Array } cssClasses A list of String css class names
+   * @param { node } element Element to which add css classes
+   */
   setCssClassList(cssClasses, element) {
     cssClasses.forEach((css) => {
       element.classList.add(css);
     });
   }
 
+  /**
+   * Remove choices that already exist
+   * @param { node } cell cell from which to remove choices
+   */
   removeChoices(cell) {
     while (cell.lastChild.id == "choice-menu") {
       cell.removeChild(cell.lastChild);
     }
   }
 
+  /**
+   * Remove numbers from solved sudoku matrix and replace with zeros
+   * @param { Number } numOfClues How many cells will be left filled (minimum 17)
+   */
   unsolveTheBoard(numOfClues) {
     let numsToThrowout = 9 * 9 - numOfClues;
 
