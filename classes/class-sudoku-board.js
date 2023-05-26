@@ -80,22 +80,23 @@ export class SudokuBoard extends SudokuMatrixGenerator {
   }
 
   createChoices(event, cell) {
-    let select = this.document.getElementById("choice-menu");
-    if (select != null) {
-      // Check if select box exists
-      this.removeChoices(select.parentNode);
-    } else {
-      select = this.document.createElement("div");
-      select.id = "choice-menu";
-      select.classList.add("options-flex-container");
+    let lastChoices = this.document.getElementsByClassName(
+      "options-flex-container"
+    )[0];
+    if (lastChoices) {
+      lastChoices.remove();
     }
+    let select = this.document.createElement("div");
+    select.id = "choice-menu";
+    select.classList.add("options-flex-container");
+    // }
 
     for (let i = 1; i < this.choices.length; i++) {
       let choice = this.document.createElement("div");
       choice.id = "choice";
       choice.innerHTML = this.choices[i];
       choice.addEventListener("click", (event) => {
-        if (this.checkIfCorrect(event, cell) == true) {
+        if (this.checkIfCorrectCell(event, cell) == true) {
           cell.style.setProperty("background-color", "lightblue", "");
         } else {
           cell.style.setProperty("background-color", "red", "");
@@ -108,7 +109,7 @@ export class SudokuBoard extends SudokuMatrixGenerator {
     cell.appendChild(select);
   }
 
-  checkIfCorrect(e, cell) {
+  checkIfCorrectCell(e, cell) {
     let row = Number(cell.id.slice(0, 1));
     let col = Number(cell.id.slice(2, 3));
     let choice = Number(e.target.innerHTML);
@@ -155,15 +156,8 @@ export class SudokuBoard extends SudokuMatrixGenerator {
   }
 
   removeChoices(cell) {
-    try {
-      while (cell.lastChild.id == "choice-menu") {
-        cell.removeChild(cell.lastChild);
-      }
-    } catch (TypeError) {
-      console.log("TypeError");
-      let choiceList = this.document.getElementById("choice-menu");
-      console.log(choiceList);
-      return;
+    while (cell.lastChild.id == "choice-menu") {
+      cell.removeChild(cell.lastChild);
     }
   }
 
