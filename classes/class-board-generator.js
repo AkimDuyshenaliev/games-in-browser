@@ -6,12 +6,20 @@ export class SudokuMatrixGenerator {
     this.randomUniqueArray = this.generateRandomUniqueArray(1, 9);
   }
 
+  /**
+   * Method that assemble the complete sudoku matrix
+   * @return { Array } a 9x9 matrix
+   */
   sudokuMatrix() {
     this.diagonalSudokuFill(); // Fill 3 diagonal sudoku 9x9 blocks, left top to right bottom
     this.fillSudokuBoard(0, 0); // Fill the rest of the blocks recursively, using Backtracking algorithm
-    return this.baseMatrix
+    return this.baseMatrix;
   }
 
+  /**
+   * A base method for generating 9x9 matrix filled with zeros
+   * @return { Array }
+   */
   generateEmptyMatrix() {
     let baseMatrix;
 
@@ -22,15 +30,27 @@ export class SudokuMatrixGenerator {
     return baseMatrix;
   }
 
-  generateUniqueArray(startNum, endNum) {
+  /**
+   * Method for generating unique array in a specified range
+   * @param { Number } from the lowest number in the array
+   * @param { Number } to the highest number in the array
+   * @return { Array }
+   */
+  generateUniqueArray(from, to) {
     let nums = new Set([]);
-    while (nums.size != endNum) {
-      nums.add(startNum);
-      startNum++;
+    while (nums.size != to) {
+      nums.add(from);
+      from++;
     }
     return Array.from(nums);
   }
 
+  /**
+   * Method for generating random unique array in a specified range
+   * @param { Number } from the lowest number in the array
+   * @param { Number } to the highest number in the array
+   * @return { Array }
+   */
   generateRandomUniqueArray(from, to) {
     let nums = new Set([]);
     while (nums.size != to) {
@@ -39,6 +59,9 @@ export class SudokuMatrixGenerator {
     return Array.from(nums);
   }
 
+  /**
+   * A method that will fill three diagonally placed 3x3 squares with valid sudoku numbers
+   */
   diagonalSudokuFill() {
     for (let i = 0; i < this.baseMatrix.length; i += 3) {
       let arr = this.generateRandomUniqueArray(1, 9);
@@ -51,6 +74,12 @@ export class SudokuMatrixGenerator {
     }
   }
 
+  /**
+   * A recursive method for filling the rest of the board using backtracking algorithm
+   * @param { Number } row the row that is being filled
+   * @param { Number } col the column that is being filled
+   * @return { boolean } will return false if determined that this solution is incorrect, true if correct
+   */
   fillSudokuBoard(row, col) {
     if (col >= this.baseMatrix[row].length) {
       row++;
@@ -80,6 +109,13 @@ export class SudokuMatrixGenerator {
     return false; // No valid solution
   }
 
+  /**
+   * Method that determines wether number placed in current row and col is sudoku valid
+   * @param { Number } row the row in which the evaluated number is
+   * @param { Number } col the column in which the evaluated number is
+   * @param { Number } num the number to be evaluated
+   * @return { boolean } return false if the number in selected position is sudoku invalid, true if is valid
+   */
   devBoardCheck(row, col, num) {
     for (let i = 0; i < this.baseMatrix[row].length; i++) {
       if (this.baseMatrix[row][i] == num) {
@@ -103,7 +139,3 @@ export class SudokuMatrixGenerator {
     return true;
   }
 }
-
-
-// const matrix = new SudokuMatrixGenerator()
-// console.log(matrix.sudokuMatrix());
