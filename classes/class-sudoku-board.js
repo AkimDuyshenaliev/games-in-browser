@@ -12,7 +12,6 @@ export class SudokuBoard extends SudokuMatrixGenerator {
     this.choices = super.generateUniqueArray(0, 10);
     this.matrix = super.sudokuMatrix();
     this.solution = JSON.parse(JSON.stringify(this.matrix));
-    this.unsolveTheBoard(17);
   }
 
   /**
@@ -46,8 +45,11 @@ export class SudokuBoard extends SudokuMatrixGenerator {
   /**
    * Main method that assembles the board, it starts and ends here
    * @param { String } mainElement the ID of the element in which to place the sudoku board
+   * @param { Number } hints show how many hints to leave on the board
    */
-  buildBoard(mainElement) {
+  buildBoard(mainElement, hints) {
+    hints < 17 ? (hints = 17) : hints; //Set minimum number of hints to 17
+    this.unsolveTheBoard(hints);
     for (let row = 0; row < this.matrix.length; row++) {
       let rowBox = this.document.createElement("div");
       rowBox.classList.add("flex-container");
