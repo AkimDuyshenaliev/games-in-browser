@@ -1,0 +1,55 @@
+
+.flex-container {
+  position: inherit;
+  display: flex;
+  align-content: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+  background-color: white;
+}
+
+.top-border {
+  border-top: 2px solid;
+}
+.left-border {
+  border-left: 2px solid;
+}
+
+.flex-container-rows {
+  position: inherit;
+  display: flex;
+  flex-direction: row;
+  width: 450px;
+}
+
+.flex-container > div {
+  position: inherit;
+  text-align: center;
+  width: 50px;
+  height: 50px;
+  line-height: 50px;
+  font-size: 45px;
+  outline: 1px solid;
+}
+
+.options-flex-container {
+  position: absolute;
+  display: flex;
+  flex-wrap: wrap;
+  width: 90px;
+  height: 90px;
+  left: -22px;
+  top: -22px;
+}
+
+.options-flex-container > div {
+  flex: 1 0 30%;
+  border: 1px solid black;
+  text-align: center;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 25px;
+  z-index: 1;
+  background-color: white;
+}

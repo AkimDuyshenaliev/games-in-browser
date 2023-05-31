@@ -1,15 +1,16 @@
 import { SudokuMatrixGenerator } from "./class-board-generator.js";
 
 export class SudokuBoard extends SudokuMatrixGenerator {
-  constructor(document) {
+  constructor(document, window) {
     super();
 
     this.document = document;
+    this.window = window;
     this.baseElement = this.defineBase("div", "custom-select", [
       "flex-container",
     ]);
-    this.title = this.defineTitle("h2", "Pure node.js Sudoku");
     this.choices = super.generateUniqueArray(0, 10);
+    this.showErrors = false;
     this.matrix = super.sudokuMatrix();
     this.solution = JSON.parse(JSON.stringify(this.matrix));
   }
@@ -31,25 +32,92 @@ export class SudokuBoard extends SudokuMatrixGenerator {
   }
 
   /**
-   * Create a title element for the sudoku board
-   * @param { String } element type of DOM element to use to create title
-   * @param { String } text text of the title
-   * @return { node } node title element with selected text
+   * Create the start button
+   * @param { node } parent is an object to which this button needs to be added
+   * @param { object } menu object holding MainMenu class
+   * @return { node } the button element
    */
-  defineTitle(element, text) {
-    let title = this.document.createElement(element);
-    title.innerHTML = text;
-    return title;
+  startButton(parent, menu) {
+    let base = this.document.createElement("div");
+    base.id = "sudoku-game";
+    base.innerText = "Sudoku";
+    base.classList.add("button");
+
+    base.addEventListener("click", (event) => {
+      base.parentNode.firstChild.remove();
+      base.remove();
+      this.sudokuMenu(menu, parent);
+    });
+
+    menu.appendObjectOrId(parent, base);
+    return base;
+  }
+
+  /**
+   * Build the start menu for sudoku
+   * @param { object } menu is the MainMenu class
+   * @param { node || String } baseID is the ID or the object itself to which this menu to be added
+   */
+  sudokuMenu(menu, baseID) {
+    let baseList = this.document.createElement("ul");
+    baseList.style.setProperty("list-style-type", "none", "");
+
+    let title = menu.defineTitle(baseList, "h2", "Sudoku difficulty");
+    let slider = menu.rangeSlider(baseList, "sudoku-difficulty", 17, 60);
+    let showErrors = menu.toggleSwitch(baseList, "show-errors", "Show errors");
+    let errorsInput = showErrors.querySelector('input[type="checkbox"]');
+    let runSudoku = menu.createButton(
+      baseList,
+      "sudoku-board",
+      "Generate sudoku board"
+    );
+
+    showErrors.addEventListener("change", () => {
+      if (errorsInput.checked) {
+        this.showErrors = true;
+        console.log(this.showErrors);
+      } else {
+        this.showErrors = false;
+        console.log(this.showErrors);
+      }
+    });
+
+    [title, slider, showErrors, runSudoku].forEach((element) => {
+      let piece = this.document.createElement("li");
+      piece.appendChild(element);
+      baseList.appendChild(piece);
+    });
+
+    this.document.getElementById(baseID).appendChild(baseList);
+
+    runSudoku.addEventListener("click", (sudokuBoardClick) => {
+      baseList.remove();
+
+      // Create a button to check user's answers for errors if showErrors == false
+      if (this.showErrors == false) {
+        let checkAnswers = menu.createButton(
+          "main",
+          "check-answers",
+          "Check answers"
+        );
+        checkAnswers.addEventListener("click", () => {
+          this.checkAnswersOnBoard();
+        });
+      }
+      this.buildBoard("main", menu.difficulty, menu.createButton);
+    });
   }
 
   /**
    * Main method that assembles the board, it starts and ends here
    * @param { String } mainElement the ID of the element in which to place the sudoku board
    * @param { Number } hints show how many hints to leave on the board
+   * @param { object } createButton method from MainMenu class for creating a button
    */
   buildBoard(mainElement, hints) {
     hints < 17 ? (hints = 17) : hints; //Set minimum number of hints to 17
     this.unsolveTheBoard(hints);
+
     for (let row = 0; row < this.matrix.length; row++) {
       let rowBox = this.document.createElement("div");
       rowBox.classList.add("flex-container");
@@ -58,14 +126,13 @@ export class SudokuBoard extends SudokuMatrixGenerator {
         let cell = this.document.createElement("div");
         cell.classList.add("flex-container-cells");
 
-        this.cellLogic(row, col, cell, rowBox);
+        this.cellLogic(row, col, cell, rowBox, ["pointer", "cell"]);
 
         this.borderStyles(cell, row, col, ["top-border"], ["left-border"]);
       }
       this.baseElement.appendChild(rowBox);
     }
 
-    this.document.getElementById(mainElement).appendChild(this.title);
     this.document.getElementById(mainElement).appendChild(this.baseElement);
   }
 
@@ -76,8 +143,9 @@ export class SudokuBoard extends SudokuMatrixGenerator {
    * @param { Number } col column in which this cell is places
    * @param { node } cell a div element to be configured
    * @param { node } rowBox a div element in which cells for the current row are being kept
+   * @param { Array } cssClasses a list of String names of css classes
    */
-  cellLogic(row, col, cell, rowBox) {
+  cellLogic(row, col, cell, rowBox, cssClasses) {
     if (this.matrix[row][col] == 0) {
       cell.style.setProperty("background-color", "white", "");
       cell.innerHTML = "";
@@ -91,6 +159,7 @@ export class SudokuBoard extends SudokuMatrixGenerator {
       cell.innerHTML = this.matrix[row][col];
     }
 
+    this.setCssClassList(cssClasses, cell);
     cell.id = row + "-" + col;
     rowBox.appendChild(cell);
   }
@@ -119,6 +188,7 @@ export class SudokuBoard extends SudokuMatrixGenerator {
    * Create choices inside a cell and set cell.innerHTML with the chosen number
    * @param { object } event present but unnecessary in this method
    * @param { node } cell cell in which to create choices
+   * @param { boolean } showErrors defines wether to show incorrect choice right away or upon board completion
    */
   createChoices(event, cell) {
     let lastChoices = this.document.getElementsByClassName(
@@ -137,17 +207,32 @@ export class SudokuBoard extends SudokuMatrixGenerator {
       choice.id = "choice";
       choice.innerHTML = this.choices[i];
       choice.addEventListener("click", (event) => {
-        if (this.checkIfCorrectCell(event, cell) == true) {
-          cell.style.setProperty("background-color", "lightblue", "");
-        } else {
-          cell.style.setProperty("background-color", "red", "");
-        }
+        this.choiceHandling(event, cell);
         cell.innerHTML = event.target.innerHTML;
       });
 
       select.appendChild(choice);
     }
     cell.appendChild(select);
+  }
+
+  /**
+   * A method that determines what to do when wrong choice was made
+   * @param { object } event from the event listener
+   * @param { node } cell the cell where the action was taken
+   */
+  choiceHandling(event, cell) {
+    if (this.showErrors == false) {
+      cell.style.setProperty("background-color", "lightblue", "");
+      return;
+    }
+
+    let check = this.checkIfCorrectCell(event, cell);
+    if (this.showErrors == true && check == true) {
+      this.paintCellCorrect(cell);
+    } else if (this.showErrors == true && check == false) {
+      this.paintCellWrong(cell);
+    }
   }
 
   /**
@@ -164,6 +249,22 @@ export class SudokuBoard extends SudokuMatrixGenerator {
       return true;
     } else {
       return false;
+    }
+  }
+
+  /**
+   * A method to check user's answers and mark incorrect ones red
+   */
+  checkAnswersOnBoard() {
+    for (let row = 0; row < this.matrix.length; row++) {
+      for (let col = 0; col < this.matrix[row].length; col++) {
+        let cell = this.document.getElementById(row + "-" + col);
+        if (Number(cell.innerHTML) == 0) {
+          continue;
+        } else if (Number(cell.innerHTML) != this.solution[row][col]) {
+          this.paintCellWrong(cell);
+        }
+      }
     }
   }
 
@@ -236,5 +337,21 @@ export class SudokuBoard extends SudokuMatrixGenerator {
         numsToThrowout--;
       }
     }
+  }
+
+  /**
+   * Method to paint the cell in a color that shows it is correct
+   * @param { node } cell the cell to be painted
+   */
+  paintCellCorrect(cell) {
+    cell.style.setProperty("background-color", "lightblue", "");
+  }
+
+  /**
+   * Method to paint the cell in a color that shows it is wrong
+   * @param { node } cell the cell to be painted
+   */
+  paintCellWrong(cell) {
+    cell.style.setProperty("background-color", "red", "");
   }
 }

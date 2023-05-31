@@ -1,0 +1,7 @@
+.pointer {
+    cursor: pointer;
+}
+
+.cell {
+    box-shadow: inset -2px -2px 4px #6d6d6d;
+}
